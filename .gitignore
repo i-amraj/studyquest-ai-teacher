@@ -1,0 +1,17 @@
+# Secrets & local state
+.env
+backend/.env
+*.db
+*.log
+.test_token
+
+# Deps & build
+.venv/
+node_modules/
+frontend/dist/
+__pycache__/
+*.pyc
+
+# Runtime uploads & test artifacts
+backend/uploads/
+e2e-shots/
