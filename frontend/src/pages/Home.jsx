@@ -18,7 +18,9 @@ function TeacherSVG() {
       <rect x="18" y="26" width="264" height="150" rx="12" fill="none" stroke="#8a6d3b" strokeWidth="7" />
       <text x="42" y="72" fill="#e9dfc8" fontSize="19" fontFamily="Fraunces,serif">a² + b² = c²</text>
       <text x="42" y="106" fill="#e9dfc8" fontSize="16" opacity=".85">Stack → LIFO</text>
-      <text x="42" y="136" fill="#e9dfc8" fontSize="16" opacity=".7">Tree → BST</text>
+      <clipPath id="wclip"><rect className="wclip-rect" x="38" y="118" width="0" height="28" /></clipPath>
+      <text className="board-write" clipPath="url(#wclip)" x="42" y="139" fill="#f4c95d" fontSize="17" fontWeight="600">Tree → BST</text>
+      <circle className="chalk-dot" cx="42" cy="132" r="3.6" fill="#fff" opacity="0" />
       <text x="196" y="80" fill="#f4c95d" fontSize="26">★</text>
       {/* body */}
       <g className="t-body">
@@ -30,10 +32,10 @@ function TeacherSVG() {
           <path d="M186 240c20-6 30-20 34-38" stroke="#8a5a3b" strokeWidth="13" strokeLinecap="round" fill="none" />
           <circle cx="222" cy="196" r="10" fill="#a06a42" />
         </g>
-        {/* pointer arm */}
-        <g>
+        {/* pointer arm — board par likhne wala haath */}
+        <g className="t-write-arm">
           <path d="M114 242c-18-2-30-12-38-28" stroke="#8a5a3b" strokeWidth="13" strokeLinecap="round" fill="none" />
-          <rect x="30" y="176" width="52" height="6" rx="3" fill="#8a6d3b" transform="rotate(-38 56 179)" />
+          <rect x="30" y="176" width="52" height="6" rx="3" fill="#f0ead8" transform="rotate(-38 56 179)" />
         </g>
         {/* head */}
         <circle cx="150" cy="168" r="42" fill="#a06a42" />
@@ -91,6 +93,29 @@ export default function Home() {
       gsap.fromTo(".teacher-stage", { scale: .92, opacity: 0, rotate: -2 }, { scale: 1, opacity: 1, rotate: 0, duration: .9, ease: "back.out(1.4)", delay: .3 });
       gsap.to(".chip-float", { y: -10, duration: 1.6, ease: "sine.inOut", yoyo: true, repeat: -1, stagger: .35 });
       gsap.to(".t-body", { y: -4, duration: 2.2, ease: "sine.inOut", yoyo: true, repeat: -1 });
+
+      // Board par LIVE likhna — chalk aage badhta hai, text peeche se khulta hai
+      const writeLines = ["Tree → BST", "Queue → FIFO", "Recursion ↻", "Big-O: O(n log n)", "Graph → BFS · DFS"];
+      const wtext = root.current?.querySelector(".board-write");
+      const wrect = root.current?.querySelector(".wclip-rect");
+      const chalk = root.current?.querySelector(".chalk-dot");
+      if (wtext && wrect && chalk) {
+        let wi = writeLines.length - 1;
+        const writeNext = () => {
+          wi = (wi + 1) % writeLines.length;
+          wtext.textContent = writeLines[wi];
+          const len = wtext.getComputedTextLength();
+          const prog = { w: 0 };
+          const tl = gsap.timeline({ onComplete: () => gsap.delayedCall(1.6, writeNext) });
+          tl.set(chalk, { opacity: 1 })
+            .to(".t-write-arm", { rotation: 2.5, duration: .09, yoyo: true, repeat: 15, ease: "sine.inOut", transformOrigin: "85% 90%" }, 0)
+            .to(prog, { w: len + 8, duration: 1.5, ease: "none",
+                onUpdate: () => { wrect.setAttribute("width", prog.w); chalk.setAttribute("cx", 40 + prog.w); } }, 0)
+            .to(chalk, { opacity: 0, duration: .3 }, "+=0.9")
+            .to(wrect, { attr: { width: 0 }, duration: .45, ease: "power2.in" }, "+=0.55");
+        };
+        gsap.delayedCall(1.2, writeNext);
+      }
     }, root);
 
     const io = new IntersectionObserver(es => es.forEach(e => {
